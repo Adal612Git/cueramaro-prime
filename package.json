@@ -1,13 +1,17 @@
-﻿{
+{
   "name": "cueramaro-prime",
   "version": "1.0.0",
-  "description": "Sistema POS local-first para Cuerámaro",
+  "description": "Sistema POS local-first para Cuer?maro",
   "private": true,
   "scripts": {
     "dev": "pnpm -r dev",
     "build": "pnpm -r build",
-    "docker:up": "docker-compose -f infra/compose/docker-compose.yml up -d",
-    "docker:down": "docker-compose -f infra/compose/docker-compose.yml down"
+    "db:up": "docker compose -f infra/compose/docker-compose.yml up -d",
+    "db:down": "docker compose -f infra/compose/docker-compose.yml down",
+    "db:logs": "docker compose -f infra/compose/docker-compose.yml logs -f",
+    "db:psql": "docker exec cueramaro-db psql -U postgres -d cueramaro_prime",
+    "db:tables": "docker exec cueramaro-db psql -U postgres -d cueramaro_prime -c \"\\dt\"",
+    "db:redis": "docker exec cueramaro-redis redis-cli ping"
   },
   "devDependencies": {
     "typescript": "^5.0.0"
