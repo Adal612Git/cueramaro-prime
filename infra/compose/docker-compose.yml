@@ -1,0 +1,24 @@
+﻿version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: cueramaro-db
+    environment:
+      POSTGRES_DB: cueramaro_prime
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+    networks:
+      - cueramaro-network
+
+volumes:
+  postgres_data:
+
+networks:
+  cueramaro-network:
+    driver: bridge
