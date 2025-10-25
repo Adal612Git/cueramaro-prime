@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:16
+    container_name: cueramaro-db
+    environment:
+      POSTGRES_DB: cueramaro_prime
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "55432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cueramoro_prime"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - cueramaro-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: cueramaro-redis
+    ports:
+      - "6380:6379"                    # ? CAMBIAMOS A PUERTO 6380
+    networks:
+      - cueramaro-network
+
+volumes:
+  postgres_data:
+
+networks:
+  cueramaro-network:
+    driver: bridge

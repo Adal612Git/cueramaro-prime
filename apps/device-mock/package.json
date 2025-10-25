@@ -1,0 +1,12 @@
+﻿{
+    "version":  "0.0.1",
+    "name":  "device-mock",
+    "scripts":  {
+                    "start":  "node src/server.js"
+                },
+    "type":  "module",
+    "dependencies":  {
+                         "ws":  "^8.18.0"
+                     },
+    "private":  true
+}

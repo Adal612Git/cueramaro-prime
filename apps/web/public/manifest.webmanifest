@@ -1,0 +1,16 @@
+{
+  "name": "Cuerámaro Prime - Sistema de Gestión",
+  "short_name": "Cuerámaro Prime",
+  "description": "Sistema de gestión para carnicería Cuerámaro Prime",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#007bc1",
+  "theme_color": "#007bc1",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
