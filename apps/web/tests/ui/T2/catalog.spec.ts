@@ -78,4 +78,15 @@ test.describe('T2 — CatalogGrid + ProductCard + PriceTag', () => {
     await gotoApp(page);
     await expect(page.locator('.product-card').first()).toHaveScreenshot('t2-product-card.png');
   });
+
+  test('empty state passes accessibility scan', async ({ page }) => {
+    await gotoApp(page, { products: [] });
+    const results = await new AxeBuilder({ page }).include('.empty-state').analyze();
+    expect(results.violations.filter((v) => ['serious', 'critical'].includes(v.impact ?? '')).length).toBe(0);
+  });
+
+  test('empty state visual regression', async ({ page }) => {
+    await gotoApp(page, { products: [] });
+    await expect(page.locator('.empty-state')).toHaveScreenshot('t2-empty-state.png');
+  });
 });

@@ -30,6 +30,16 @@ test.describe('T1 — Header + SyncBadge + CartIconButton', () => {
     await expect(page.getByText('Sin conexión. Guardamos tus cambios y enviaremos tu pedido cuando vuelva la red.')).toBeVisible({ timeout: 10_000 });
   });
 
+  test('sync badge passes accessibility scan in offline state', async ({ page, context }) => {
+    await context.setOffline(true);
+    await expect(page.getByText('Sin conexión. Guardamos tus cambios y enviaremos tu pedido cuando vuelva la red.')).toBeVisible();
+    const results = await new AxeBuilder({ page })
+      .include('.sync-badge')
+      .withTags(['wcag2a', 'wcag2aa'])
+      .analyze();
+    expect(results.violations.filter((v) => ['serious', 'critical'].includes(v.impact ?? '')).length).toBe(0);
+  });
+
   test('cart counter starts at 0', async ({ page }) => {
     await expect(page.getByRole('button', { name: /Abrir carrito \(0\)/ })).toBeVisible();
   });
@@ -67,5 +77,9 @@ test.describe('T1 — Header + SyncBadge + CartIconButton', () => {
 
   test('header visual regression', async ({ page }) => {
     await expect(page.locator('header')).toHaveScreenshot('t1-header.png');
+  });
+
+  test('cart button visual regression', async ({ page }) => {
+    await expect(page.getByRole('button', { name: /Abrir carrito \(0\)/ })).toHaveScreenshot('t1-cart-button.png');
   });
 });

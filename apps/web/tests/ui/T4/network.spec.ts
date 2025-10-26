@@ -61,6 +61,17 @@ test.describe('T4 — Estados de red', () => {
     expect(results.violations.filter((v) => ['serious', 'critical'].includes(v.impact ?? '')).length).toBe(0);
   });
 
+  test('shows degraded connectivity message when health reports degraded', async ({ page }) => {
+    await gotoApp(page, { healthSequence: [{ status: 'degraded', ts: '2024-01-01T09:00:00.000Z' }] });
+    await expect(page.getByText('Conectividad inestable')).toBeVisible();
+  });
+
+  test('axe scan passes in degraded state', async ({ page }) => {
+    await gotoApp(page, { healthSequence: [{ status: 'degraded', ts: '2024-01-01T09:00:00.000Z' }] });
+    const results = await new AxeBuilder({ page }).include('.sync-badge').analyze();
+    expect(results.violations.filter((v) => ['serious', 'critical'].includes(v.impact ?? '')).length).toBe(0);
+  });
+
   test('sync badge snapshot — online', async ({ page }) => {
     await gotoApp(page);
     await expect(page.locator('.sync-badge')).toHaveScreenshot('t4-online.png');

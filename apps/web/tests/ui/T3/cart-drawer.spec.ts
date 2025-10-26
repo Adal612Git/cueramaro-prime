@@ -84,4 +84,17 @@ test.describe('T3 — CartDrawer', () => {
     const results = await new AxeBuilder({ page }).include('.cart-drawer').analyze();
     expect(results.violations.filter((v) => ['serious', 'critical'].includes(v.impact ?? '')).length).toBe(0);
   });
+
+  test('empty cart visual regression', async ({ page }) => {
+    await gotoApp(page);
+    await page.getByRole('button', { name: /Abrir carrito/ }).click();
+    await expect(page.locator('.cart-drawer')).toHaveScreenshot('t3-cart-drawer-empty.png');
+  });
+
+  test('empty cart accessibility scan', async ({ page }) => {
+    await gotoApp(page);
+    await page.getByRole('button', { name: /Abrir carrito/ }).click();
+    const results = await new AxeBuilder({ page }).include('.cart-drawer').analyze();
+    expect(results.violations.filter((v) => ['serious', 'critical'].includes(v.impact ?? '')).length).toBe(0);
+  });
 });
