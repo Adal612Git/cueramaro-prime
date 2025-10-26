@@ -1,149 +1,177 @@
-﻿import React, { useState, useEffect } from 'react';
-import './index.css'; // Cambiado de App.css a index.css
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import './index.css';
+import './App.css';
+import Header from './components/Header';
+import CatalogGrid from './features/catalog/CatalogGrid';
+import { useProducts } from './features/catalog/useProducts';
+import { useCartStore } from './features/cart/cart.store';
+import CartDrawer from './components/CartDrawer';
+import { copy } from './i18n/es-MX';
+import { getJSON, postJSON } from './lib/api';
+import type { SyncBadgeProps } from './components/SyncBadge';
+import { SyncStatusContext } from './context/SyncStatusContext';
 
-// Mock data - después se reemplaza con API real
-const productosIniciales = [
-  { id: 1, nombre: "Rib Eye", precio: 450, imagen: "/placeholder-carne.jpg", descripcion: "Corte premium marmoleado" },
-  { id: 2, nombre: "Arrachera", precio: 380, imagen: "/placeholder-carne.jpg", descripcion: "Perfecta para asar" },
-  { id: 3, nombre: "Filete", precio: 520, imagen: "/placeholder-carne.jpg", descripcion: "Ternera de primera calidad" },
-  { id: 4, nombre: "Costilla", precio: 320, imagen: "/placeholder-carne.jpg", descripcion: "Corte con hueso" },
-];
+const VERSION = '1.0.0';
+const API_URL = '/api';
 
-function App() {
-  const [productos] = useState(productosIniciales);
-  const [carrito, setCarrito] = useState([]);
-  const [cargando, setCargando] = useState(true);
+type HealthResponse = { status: 'ok' | 'degraded' | 'error'; ts: string };
 
-  // Simular carga inicial
-  useEffect(() => {
-    setTimeout(() => setCargando(false), 1000);
+export default function App() {
+  const { products, isLoading, isError, refetch, hasProducts } = useProducts();
+  const { items, total, addItem, removeItem, clear } = useCartStore((state) => ({
+    items: state.items,
+    total: state.total,
+    addItem: state.addItem,
+    removeItem: state.removeItem,
+    clear: state.clear,
+  }));
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<SyncBadgeProps['status']>('syncing');
+  const [lastSync, setLastSync] = useState<string | undefined>();
+
+  const handleAddProduct = useCallback(
+    (id: string | number) => {
+      const product = products.find((p) => p.id === id);
+      if (!product) return;
+      addItem({
+        productId: product.id,
+        nombre: product.nombre,
+        precioPorKg: product.precioPorKg,
+        cantidadKg: 1,
+      });
+    },
+    [addItem, products]
+  );
+
+  const pollHealth = useCallback(async () => {
+    try {
+      setSyncStatus((status) => (status === 'offline' ? 'syncing' : status));
+      const result = await getJSON<HealthResponse>('/health');
+      setLastSync(result.ts);
+      if (result.status === 'ok') {
+        setSyncStatus('online');
+      } else if (result.status === 'degraded') {
+        setSyncStatus('degraded');
+      } else {
+        setSyncStatus('offline');
+      }
+    } catch (error) {
+      setSyncStatus('offline');
+    }
   }, []);
 
-  const agregarAlCarrito = (producto) => {
-    setCarrito(prev => [...prev, { ...producto, id: Date.now() }]);
-  };
+  useEffect(() => {
+    pollHealth();
+    const interval = window.setInterval(pollHealth, 20000);
+    const handleOnline = () => pollHealth();
+    const handleOffline = () => setSyncStatus('offline');
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [pollHealth]);
 
-  const eliminarDelCarrito = (id) => {
-    setCarrito(prev => prev.filter(item => item.id !== id));
-  };
+  useEffect(() => {
+    if (syncStatus === 'offline') {
+      setDrawerOpen(true);
+    }
+  }, [syncStatus]);
 
-  const totalCarrito = carrito.reduce((sum, item) => sum + item.precio, 0);
+  const totalItems = items.length;
 
-  if (cargando) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando Cuerámaro Prime...</p>
-        </div>
-      </div>
-    );
-  }
+  const heroDescription = useMemo(
+    () => `${copy.heroSubtitle}`,
+    []
+  );
+
+  const handleConfirm = useCallback(async () => {
+    if (syncStatus === 'offline' || items.length === 0) return;
+
+    const payload = {
+      items: items.map((item) => ({
+        productId: item.productId,
+        cantidadKg: item.cantidadKg,
+        precioPorKg: item.precioPorKg,
+      })),
+      total,
+      source: 'web',
+    };
+
+    await postJSON<typeof payload, { ok: boolean }>('/ventas', payload).catch(() => {
+      // Mantener UX consistente; errores se pueden manejar mostrando banner en futuras iteraciones
+    });
+    clear();
+    setDrawerOpen(false);
+  }, [clear, items, syncStatus, total]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-red-700">🥩 Cuerámaro Prime</h1>
-              <span className="ml-2 bg-red-100 text-red-800 text-xs px-2 py-1 rounded">v1.0</span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <span className="bg-red-600 text-white px-2 py-1 rounded-full text-sm">
-                  {carrito.length} items
-                </span>
-              </div>
-              <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">
-                Iniciar Sesión
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
+    <SyncStatusContext.Provider value={{ status: syncStatus, lastSync }}>
+      <div className="app-shell">
+        <Header
+          version={VERSION}
+          apiUrl={API_URL}
+          syncStatus={syncStatus}
+          lastSync={lastSync}
+          cartCount={totalItems}
+          onCartClick={() => setDrawerOpen(true)}
+        />
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-red-700 to-red-800 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-bold mb-4">Cortes Premium de Calidad</h2>
-          <p className="text-xl opacity-90 mb-8">La mejor carne directamente a tu mesa</p>
-          <button className="bg-white text-red-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
-            Ver Catálogo Completo
+        <section className="hero" aria-labelledby="hero-heading">
+          <h1 id="hero-heading" className="hero__title">
+            {copy.heroTitle}
+          </h1>
+          <p className="hero__subtitle">{heroDescription}</p>
+          <button type="button" className="hero__cta" onClick={() => {
+            const catalog = document.getElementById('catalog-section');
+            catalog?.scrollIntoView({ behavior: 'smooth' });
+          }}>
+            {copy.heroCta}
           </button>
-        </div>
-      </section>
+        </section>
 
-      {/* Catálogo de Productos */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <h3 className="text-2xl font-bold text-gray-900 mb-8">Nuestros Cortes Destacados</h3>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {productos.map(producto => (
-            <div key={producto.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-              <div className="h-48 bg-red-200 flex items-center justify-center">
-                <span className="text-red-600 font-semibold">🖼️ Imagen de {producto.nombre}</span>
-              </div>
-              <div className="p-4">
-                <h4 className="font-bold text-lg text-gray-900">{producto.nombre}</h4>
-                <p className="text-gray-600 text-sm mt-1">{producto.descripcion}</p>
-                <div className="flex justify-between items-center mt-4">
-                  <span className="text-2xl font-bold text-red-700">${producto.precio}/kg</span>
-                  <button 
-                    onClick={() => agregarAlCarrito(producto)}
-                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition"
-                  >
-                    Agregar
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Carrito Lateral */}
-      {carrito.length > 0 && (
-        <div className="fixed bottom-4 right-4 bg-white rounded-lg shadow-xl p-6 max-w-sm border">
-          <h4 className="font-bold text-lg mb-4">🛒 Tu Carrito</h4>
-          <div className="space-y-3 max-h-60 overflow-y-auto">
-            {carrito.map(item => (
-              <div key={item.id} className="flex justify-between items-center border-b pb-2">
-                <div>
-                  <p className="font-medium">{item.nombre}</p>
-                  <p className="text-sm text-gray-600">${item.precio}</p>
-                </div>
-                <button 
-                  onClick={() => eliminarDelCarrito(item.id)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  ❌
-                </button>
-              </div>
-            ))}
+        <main id="catalog-section" role="main" aria-live="polite">
+          <div className="catalog-header">
+            <h2 className="catalog-title">Catálogo</h2>
+            <p style={{ color: 'var(--color-gray-600)', margin: 0 }}>
+              {syncStatus === 'offline' ? copy.sync.offline : copy.sync.online}
+            </p>
           </div>
-          <div className="border-t mt-4 pt-4">
-            <div className="flex justify-between font-bold text-lg">
-              <span>Total:</span>
-              <span>${totalCarrito}</span>
-            </div>
-            <button className="w-full bg-green-600 text-white py-3 rounded-lg mt-4 hover:bg-green-700 transition">
-              Finalizar Compra
-            </button>
-          </div>
-        </div>
-      )}
 
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>© 2025 Cuerámaro Prime - Sistema de Gestión Carniceria</p>
-          <p className="text-gray-400 text-sm mt-2">Desarrollado con ❤️ para tu negocio</p>
-        </div>
-      </footer>
-    </div>
+          <CatalogGrid
+            products={products}
+            isLoading={isLoading}
+            isError={isError}
+            onRetry={() => refetch()}
+            onAdd={handleAddProduct}
+            hasProducts={hasProducts}
+          />
+        </main>
+
+        <button
+          type="button"
+          className="cart-fab"
+          onClick={() => setDrawerOpen(true)}
+          aria-label={`Abrir carrito (${totalItems})`}
+        >
+          🛒 {copy.cartTitle} ({totalItems})
+        </button>
+
+        <CartDrawer
+          items={items}
+          isOpen={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          onRemove={removeItem}
+          onConfirm={handleConfirm}
+        />
+
+        <footer className="footer" role="contentinfo">
+          Sistema Cuerámaro Prime · versión {VERSION}
+        </footer>
+      </div>
+    </SyncStatusContext.Provider>
   );
 }
-
-export default App;

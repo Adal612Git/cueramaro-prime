@@ -1,3 +1,85 @@
-﻿@tailwind base;
-@tailwind components;
-@tailwind utilities;
+:root {
+  --color-brand: #B22222;
+  --color-brand-600: #a01f1f;
+  --color-brand-100: #fde7e7;
+  --color-ink: #111827;
+  --color-gray-800: #1F2937;
+  --color-gray-600: #4B5563;
+  --color-gray-300: #D1D5DB;
+  --color-gray-100: #F3F4F6;
+  --color-success: #16A34A;
+  --color-warning: #D97706;
+  --color-danger: #DC2626;
+  --color-focus: #2563EB;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --shadow-card: 0 8px 18px rgba(17, 24, 39, 0.08);
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+  --font-size-base: 16px;
+  --font-size-h1: 32px;
+  --font-size-h2: 24px;
+  --font-size-h3: 20px;
+  --font-size-price: 22px;
+  --font-size-small: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: var(--font-size-base);
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--color-gray-100);
+  color: var(--color-ink);
+}
+
+button, a {
+  cursor: pointer;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible,
+[tabindex="0"]:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+main {
+  display: block;
+}
+
+.hide-scrollbar {
+  scrollbar-width: thin;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.hide-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hide-scrollbar::-webkit-scrollbar-thumb {
+  background-color: var(--color-gray-300);
+  border-radius: 3px;
+}
