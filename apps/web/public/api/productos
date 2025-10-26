@@ -1,0 +1,5 @@
+[
+  { "id": "1", "nombre": "Rib Eye", "descripcion": "Corte premium marmoleado", "precioPorKg": 450 },
+  { "id": "2", "nombre": "Arrachera", "descripcion": "Perfecta para asar", "precioPorKg": 380 },
+  { "id": "3", "nombre": "Filete", "descripcion": "Suave y jugoso", "precioPorKg": 520 }
+]
