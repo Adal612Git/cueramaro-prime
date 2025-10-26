@@ -1,38 +1,38 @@
-import React, { useState } from "react";
-import "./App.css";
+import React, { useState } from 'react';
+import './App.css';
 
 function App() {
   const [stats, setStats] = useState({
     inventario: 1568,
     ventas: 22890,
     clientes: 47,
-    comprasPendientes: 4
+    comprasPendientes: 4,
   });
 
   const [ventas, setVentas] = useState([
-    { id: 1, producto: "Res Premium", cantidad: 25, total: 1250, fecha: "2024-01-24" },
-    { id: 2, producto: "Cerdo", cantidad: 15, total: 750, fecha: "2024-01-24" },
-    { id: 3, producto: "Pollo", cantidad: 30, total: 900, fecha: "2024-01-24" }
+    { id: 1, producto: 'Res Premium', cantidad: 25, total: 1250, fecha: '2024-01-24' },
+    { id: 2, producto: 'Cerdo', cantidad: 15, total: 750, fecha: '2024-01-24' },
+    { id: 3, producto: 'Pollo', cantidad: 30, total: 900, fecha: '2024-01-24' },
   ]);
 
   const actualizarDatos = () => {
-    setStats(prev => ({
+    setStats((prev) => ({
       inventario: prev.inventario + Math.floor(Math.random() * 50),
       ventas: prev.ventas + Math.floor(Math.random() * 1000),
       clientes: prev.clientes + 1,
-      comprasPendientes: Math.max(1, prev.comprasPendientes - 1)
+      comprasPendientes: Math.max(1, prev.comprasPendientes - 1),
     }));
   };
 
   const nuevaVenta = () => {
     const nueva = {
       id: ventas.length + 1,
-      producto: "Producto " + (ventas.length + 1),
+      producto: 'Producto ' + (ventas.length + 1),
       cantidad: Math.floor(Math.random() * 50) + 5,
       total: Math.floor(Math.random() * 2000) + 500,
-      fecha: new Date().toISOString().split('T')[0]
+      fecha: new Date().toISOString().split('T')[0],
     };
-    setVentas(prev => [nueva, ...prev]);
+    setVentas((prev) => [nueva, ...prev]);
   };
 
   return (
@@ -43,15 +43,15 @@ function App() {
           <div className="logo">
             <span className="logo-icon">??</span>
             <div>
-              <h1>Cuer�maro Prime</h1>
-              <div className="version">Frontend PWA � v0.1.0</div>
+              <h1>CuerÃ¡maro Prime</h1>
+              <div className="version">Frontend PWA Â· v0.1.0</div>
             </div>
           </div>
           <div className="user-info">
             <div className="avatar">JA</div>
             <div className="user-details">
-              <div className="user-name">Jefe de Almac�n</div>
-              <div className="user-status">Sesi�n activa</div>
+              <div className="user-name">Jefe de AlmacÃ©n</div>
+              <div className="user-status">SesiÃ³n activa</div>
             </div>
           </div>
         </div>
@@ -62,7 +62,7 @@ function App() {
         {/* SIDEBAR */}
         <nav className="sidebar">
           <div className="nav-section">
-            <div className="nav-title">MEN� PRINCIPAL</div>
+            <div className="nav-title">MENÃš PRINCIPAL</div>
             <a href="#" className="nav-item active">
               <span className="nav-icon">??</span>
               Dashboard
@@ -129,7 +129,7 @@ function App() {
               <div className="stat-icon">??</div>
               <div className="stat-content">
                 <div className="stat-value">${stats.ventas.toLocaleString()}</div>
-                <div className="stat-label">Ventas del D�a</div>
+                <div className="stat-label">Ventas del DÃ­a</div>
                 <div className="stat-trend positive">+12%</div>
               </div>
             </div>
@@ -163,11 +163,13 @@ function App() {
               </button>
             </div>
             <div className="sales-list">
-              {ventas.map(venta => (
+              {ventas.map((venta) => (
                 <div key={venta.id} className="sale-item">
                   <div className="sale-info">
                     <div className="sale-product">{venta.producto}</div>
-                    <div className="sale-meta">{venta.cantidad} kg � {venta.fecha}</div>
+                    <div className="sale-meta">
+                      {venta.cantidad} kg â€¢ {venta.fecha}
+                    </div>
                   </div>
                   <div className="sale-amount">${venta.total}</div>
                 </div>
@@ -178,7 +180,7 @@ function App() {
           {/* QUICK ACTIONS */}
           <div className="section">
             <div className="section-header">
-              <h3>Acciones R�pidas</h3>
+              <h3>Acciones RÃ¡pidas</h3>
             </div>
             <div className="actions-grid">
               <button className="action-btn">

@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "?? Verificando tipos (TypeScript)..."
+npm run typecheck || exit 1
+
+echo "? Aplicando formato y linting (lint-staged)..."
+npx lint-staged || exit 1

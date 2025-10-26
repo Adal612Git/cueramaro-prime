@@ -1,3 +1,46 @@
-﻿@tailwind base;
-@tailwind components;
-@tailwind utilities;
+﻿/* 🛡️ CSS BLINDEADO - SIN DEPENDENCIAS EXTERNAS */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+  background: #f9fafb;
+  color: #111827;
+  line-height: 1.5;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 🛡️ ESTILOS DE FALLBACK */
+.fallback-ui {
+  padding: 2rem;
+  text-align: center;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin: 2rem;
+}
+
+.fallback-ui h1 {
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+.fallback-ui button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}

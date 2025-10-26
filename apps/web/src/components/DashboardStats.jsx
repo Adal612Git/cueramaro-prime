@@ -5,16 +5,21 @@ export function DashboardStats() {
   const [alertas, setAlertas] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:3001/dashboard')
-      .then(res => res.json())
+    fetch('/api/dashboard')
+      .then((res) => res.json())
       .then(setStats);
-    
-    fetch('http://localhost:3001/dashboard/alertas')
-      .then(res => res.json())
+
+    fetch('/api/dashboard/alertas')
+      .then((res) => res.json())
       .then(setAlertas);
   }, []);
 
-  if (!stats) return <div style={{padding: '20px', textAlign: 'center'}}>🔄 Cargando datos en vivo...</div>;
+  if (!stats)
+    return (
+      <div style={{ padding: '20px', textAlign: 'center' }}>
+        Ã°Å¸â€â€ž Cargando datos en vivo...
+      </div>
+    );
 
   return (
     <div className="stats-grid">
@@ -24,7 +29,7 @@ export function DashboardStats() {
         <div className="stat-note">+5% vs ayer</div>
       </div>
       <div className="stat-card secondary">
-        <div className="stat-title">Ventas del día</div>
+        <div className="stat-title">Ventas del dÃƒÂ­a</div>
         <div className="stat-value">\</div>
         <div className="stat-note">{stats.ventasCount} transacciones</div>
       </div>
@@ -41,17 +46,21 @@ export function DashboardStats() {
 
       {alertas && (
         <>
-          <div className="stat-card" style={{borderLeftColor: 'var(--danger)'}}>
+          <div className="stat-card" style={{ borderLeftColor: 'var(--danger)' }}>
             <div className="stat-title">Alertas</div>
-            <p style={{fontSize: '0.85rem', color: 'var(--neutral-dark)'}}>
-              {alertas.alertas.map((alerta, idx) => <div key={idx}>• {alerta}</div>)}
+            <p style={{ fontSize: '0.85rem', color: 'var(--neutral-dark)' }}>
+              {alertas.alertas.map((alerta, idx) => (
+                <div key={idx}>Ã¢â‚¬Â¢ {alerta}</div>
+              ))}
             </p>
             <button className="btn btn-outline">Ver todas</button>
           </div>
-          <div className="stat-card" style={{borderLeftColor: 'var(--secondary)'}}>
+          <div className="stat-card" style={{ borderLeftColor: 'var(--secondary)' }}>
             <div className="stat-title">Actividad reciente</div>
-            <p style={{fontSize: '0.85rem', color: 'var(--neutral-dark)'}}>
-              {alertas.actividad.map((act, idx) => <div key={idx}>• {act}</div>)}
+            <p style={{ fontSize: '0.85rem', color: 'var(--neutral-dark)' }}>
+              {alertas.actividad.map((act, idx) => (
+                <div key={idx}>Ã¢â‚¬Â¢ {act}</div>
+              ))}
             </p>
             <button className="btn btn-outline">Ver historial</button>
           </div>
