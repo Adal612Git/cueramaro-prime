@@ -1,0 +1,103 @@
+name: cueramaro-prime
+
+volumes:
+  dbdata:
+  redisdata:
+  grafana_storage:
+
+networks:
+  cp-net:
+    driver: bridge
+
+services:
+  db:
+    image: postgres:14
+    container_name: cp-db
+    restart: unless-stopped
+    ports:
+      - "5433:5432"  # host:container
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-cueramaro_prime}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-cueramaro_prime} || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - cp-net
+
+  redis:
+    image: redis:7
+    container_name: cp-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    restart: unless-stopped
+    ports:
+      - "6380:6379"  # avoid 6379 host conflict on host
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - cp-net
+    profiles: ["optional"]
+
+  api:
+    build:
+      context: ../apps/api  # from repo root: ./apps/api
+    container_name: cp-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      PORT: ${PORT_API:-3000}
+      NODE_ENV: ${NODE_ENV:-development}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5174}
+    ports:
+      - "3001:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/health || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks:
+      - cp-net
+
+  web:
+    build:
+      context: ../apps/web  # from repo root: ./apps/web
+    container_name: cp-web
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+      PORT: "5173"
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "5174:5173"
+    networks:
+      - cp-net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: cp-grafana
+    restart: unless-stopped
+    ports:
+      - "3100:3000"
+    volumes:
+      - grafana_storage:/var/lib/grafana
+    networks:
+      - cp-net
+    profiles: ["observability"]

@@ -1,0 +1,68 @@
+name: CI Recovery
+
+on:
+  pull_request:
+    branches:
+      - 'architect/recovery-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: cueramaro_prime
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      VITE_API_URL: http://localhost:3001
+      ALLOWED_ORIGINS: http://localhost:5174
+      PORT_API: 3000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+          cache-dependency-path: '**/pnpm-lock.yaml'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Print versions
+        run: |
+          docker --version
+          docker compose version
+          node --version || true
+          npm --version || true
+          pnpm --version || true
+
+      - name: Run full recovery tests
+        shell: bash
+        run: |
+          bash tests/run_all.sh
+
+      - name: Zip Playwright HTML report
+        if: always()
+        run: |
+          if [ -d report/playwright-report/html ]; then \
+            (cd report && zip -r playwright-report.zip playwright-report/html >/dev/null 2>&1 || true); \
+          fi
+
+      - name: Upload report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: recovery-report
+          path: |
+            report/result.json
+            report/result.html
+            report/playwright-report.zip

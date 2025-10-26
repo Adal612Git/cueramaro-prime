@@ -1,1 +1,3 @@
-/* Estilos globales */
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;

@@ -1,0 +1,53 @@
+﻿=== ESTRUCTURA DE COMPONENTES FRONTEND ===
+Fecha: 10/25/2025 23:31:43
+
+DIRECTORIO RAIZ (apps\web):
+  .github
+  infra
+  node_modules
+  public
+  scripts
+  src
+  .env.development
+  .gitignore
+  dashboard-sistema.html
+  dashboard-static.html
+  docker-status.txt
+  eslint.config.js
+  estructura.txt
+  index.html
+  package-lock.json
+  package.json
+  pnpm-lock.yaml
+  pnpm-workspace.yaml
+  README.md
+  tsconfig.app.json
+  tsconfig.json
+  tsconfig.node.json
+  vite.config.ts
+
+DIRECTORIO SRC:
+  assets
+  components
+  App.css
+  App.jsx
+  App.tsx
+  index.css
+  main.tsx
+  assets\react.svg
+  components\DashboardStats.jsx
+
+COMPONENTES DETECTADOS:
+  📄 C:\Users\romer\OneDrive\Desktop\carniceria\Carniceria\Propuesta\cueramaro-prime\\src\components\DashboardStats.jsx
+    Contenido (primeras líneas):
+      import React, { useState, useEffect } from 'react';
+      
+      export function DashboardStats() {
+        const [stats, setStats] = useState(null);
+        const [alertas, setAlertas] = useState(null);
+      
+        useEffect(() => {
+          fetch('http://localhost:3001/dashboard')
+            .then(res => res.json())
+            .then(setStats);
+
